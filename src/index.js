@@ -16,10 +16,32 @@ function useInput(defaultValue) {
   return { value, onChange };
 }
 
+function useFetch(url) {
+  const [payload, setPayload] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const callUrl = async () => {
+    try {
+      const { data } = await Axios.get(url);
+      setPayload(data);
+    } catch {
+      setError("😭");
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    callUrl();
+  }, []);
+
+  return { payload, loading, error };
+}
 function App() {
-  const firstname = useInput("First Name");
-  const lastname = useInput("Last Name");
-  //console.log(name);
+  const firstname = useInput("");
+  const lastname = useInput("");
+  const { payload, loading, error } = useFetch("https://aws.random.cat/meow");
+  console.log(firstname);
   return (
     <div className="App">
       <h1>Use Hooks</h1>
@@ -34,6 +56,15 @@ function App() {
         {...lastname}
         placeholder="what's your last name"
       />
+      <br />
+      {loading && <span>loading your cat</span>}
+      {!loading && error && <span>{error}</span>}
+      {!loading && payload && (
+        <img src={payload.file} width="250" alt="cat_img" />
+      )}
+      <br />
+      {firstname.value} {``}
+      {lastname.value}
     </div>
   );
 }
